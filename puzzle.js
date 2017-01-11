@@ -141,6 +141,7 @@ function start(){
 /*重置函数*/
 function reset() {
 	time = 0;
+	if(set_timer) clearInterval(set_timer); //清空时间
 	initData();//初始化数据
 	randomD();//把方块随机打乱函数
 	if (pause) {
@@ -148,26 +149,34 @@ function reset() {
 	}
 }
 
-/*随机打乱方块函数，我们的思路是从第九块开始，随机生成一个数，然后他们两块对调一下*/
+/*随机打乱方块函数，先找到空的格子，获得可以与空格子交换的格子，在这些格子中随机找一个格子，然后他们两块对调一下*/
 function randomD(){
-	for(var i=9; i>1; --i){
-        var to=parseInt(Math.random()*(i-1)+1);//产生随机数，范围为1到i，不能超出范围，因为没这个id的DIV
-        if(d[i] != 0){
-            document.getElementById("d"+d[i]).style.left=d_posXY[to][0]+"px";
-            document.getElementById("d"+d[i]).style.top=d_posXY[to][1]+"px";
-        }
-        //把当前的DIV位置设置为随机产生的DIV的位置
-        if(d[to] != 0){
-            document.getElementById("d"+d[to]).style.left=d_posXY[i][0]+"px";
-            document.getElementById("d"+d[to]).style.top=d_posXY[i][1]+"px";
-        }
-        //把随机产生的DIV的位置设置为当前的DIV的位置
-        var tem=d[to];
-        d[to]=d[i];
-        d[i]=tem;
-        //然后把它们两个的DIV保存的编号对调一下
-    }
+	var changeTimes = 100;//交换次数
+ 	for (var i = 0; i < changeTimes; i++) {
+ 		var index = searchCanMoveDiv();//大DIV中空小DIV的位置
+ 		var to = searchTargetDiv(index);//随机获得一个可以移动的DIV位置
 
+ 		document.getElementById("d"+d[to]).style.left = d_posXY[index][0] + "px";
+ 		document.getElementById("d"+d[to]).style.top = d_posXY[index][1] + "px";
+
+ 		var tem=d[to];
+		d[to]=d[index];
+		d[index]=tem;
+		//然后把它们两个的DIV保存的编号对调一下
+ 	}
+
+}
+
+function searchCanMoveDiv(){
+	for (var i = 1; i < d.length; i++) {
+		if (d[i] == 0) {return i;}
+	}
+}
+
+function searchTargetDiv(id){
+	var direct = d_direct[id];//获得可供div id移动的方向数组
+	var i = parseInt(Math.random()*(direct.length));//随机获取数组坐标
+	return direct[i];
 }
 
 window.onload = function(){
